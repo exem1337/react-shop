@@ -1,10 +1,11 @@
 import { useEffect, useState } from "react";
 import axios from 'axios';
 import Product from "./Product";
+import ProductCategories from "./ProductCategories";
 
 export default function Products() {
   const [products, setProducts] = useState([]);
-
+  
   const getProducts = async () => {
     await axios.get('https://fakestoreapi.com/products/').then((res) => setProducts(res.data));
   }
@@ -12,9 +13,18 @@ export default function Products() {
   const ProductsList = () => {
     return products.length ?
       products.map((el) => (
-        <Product key={el.id} product={el}/>
+        <Product key={el.id} product={el} />
       ))
     : <div>Нет продуктов</div> 
+  }
+
+  async function getProductsByCategory(category) {
+    if (!category) {
+      await getProducts()
+      return;
+    }
+
+    await axios.get(`https://fakestoreapi.com/products/category/${category}`).then((res) => setProducts(res.data));
   }
 
   useEffect(() => {
@@ -22,8 +32,11 @@ export default function Products() {
   }, []);
 
   return (
-    <div className="products">
-      <ProductsList />
-    </div>
+    <>
+      <ProductCategories handleCategory={getProductsByCategory} />
+      <div className="products">
+        <ProductsList />
+      </div>
+    </>
   )
 }
